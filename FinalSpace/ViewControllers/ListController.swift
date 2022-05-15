@@ -1,5 +1,5 @@
 //
-//  MainController.swift
+//  ListController.swift
 //  FinalSpace
 //
 //  Created by Василий Полторак on 15.05.2022.
@@ -9,7 +9,7 @@ import UIKit
 
 private let reuseIdentifier = "Cell"
 
-class MainController: UICollectionViewController {
+class ListController: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
