@@ -8,22 +8,30 @@
 import UIKit
 
 class StartController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+    
+    private var data: String!
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let listController = segue.destination as! ListController
+        if data == "Character" {
+            listController.updateCharacters()
+        } else {
+            listController.updateEpisodes()
+        }
+        listController.data = data
+        
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    
+    @IBAction func viewListOfCharacters() {
+        data = "Character"
+        performSegue(withIdentifier: "goToList", sender: nil)
     }
-    */
-
+    
+    @IBAction func viewListOfEpisodes() {
+        data = "Episode"
+        performSegue(withIdentifier: "goToList", sender: nil)
+    }
+    
 }

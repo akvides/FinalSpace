@@ -7,82 +7,91 @@
 
 import UIKit
 
-private let reuseIdentifier = "Cell"
-
 class ListController: UICollectionViewController {
-
+    
+    var data: String!
+    
+    private var characters = [Character]()
+    private var character: Character!
+    private var episodes = [Episode]()
+    private var episode: Episode!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Register cell classes
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-
-        // Do any additional setup after loading the view.
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    
+    func updateCharacters() {
+        NetworkManager.shared.fetchCharacters(by: "character") { characters in
+            self.characters = characters
+            self.collectionView.reloadData()
+        }
+    }
+    
+    func updateEpisodes() {
+        NetworkManager.shared.fetchEpisodes(by: "episode") { episodes in
+            self.episodes = episodes
+            self.collectionView.reloadData()
+        }
+    }
+    
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
-
-    // MARK: UICollectionViewDataSource
-
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
+        let detailController = segue.destination as! DetailController
+        if data == "Character" {
+            detailController.character = character
+        } else {
+            detailController.episode = episode
+        }
     }
 
+    
 
+}
+
+extension ListController {
+    
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
-        return 0
+        if data == "Character" {
+            return characters.count
+        } else {
+            return episodes.count
+        }
+        
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
-    
-        // Configure the cell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! CollectionCell
+        
+        if data == "Character" {
+            let character = characters[indexPath.row]
+            cell.setupCharacters(character)
+        } else {
+            let episode = episodes[indexPath.row]
+            cell.setupEpisodes(episode)
+        }
+        
+        
+        
+        cell.configureImage(hight: (UIScreen.main.bounds.width / 2 - 10) / 1.75)
+        cell.configureBackgroundView()
     
         return cell
     }
-
-    // MARK: UICollectionViewDelegate
-
-    /*
-    // Uncomment this method to specify if the specified item should be highlighted during tracking
-    override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment this method to specify if the specified item should be selected
-    override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-    override func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
-        return false
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-        return false
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
     
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//        objext = results[indexPath.row]
+        if data == "Character" {
+            character = characters[indexPath.row]
+        } else {
+            episode = episodes[indexPath.row]
+        }
+        performSegue(withIdentifier: "goToDetail", sender: nil)
     }
-    */
+}
 
+extension ListController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        CGSize(width: UIScreen.main.bounds.width / 2 - 20, height: UIScreen.main.bounds.height / 3)
+    }
 }
