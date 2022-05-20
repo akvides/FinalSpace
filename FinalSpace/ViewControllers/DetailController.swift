@@ -17,20 +17,30 @@ class DetailController: UIViewController {
     var character: Character?
     var episode: Episode?
     
+    private var activityIndicator = UIActivityIndicatorView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        activityIndicator = GlobalMethods.shared.addActivityIndicator(in: self.view)
         
         if character?.name != nil {
             navigationItem.title = character?.name
-            imgUrl = character?.img_url
+            imgUrl = character?.imageUrl
         } else {
             navigationItem.title = episode?.name
-            imgUrl = episode?.img_url
+            imgUrl = episode?.imageUrl
         }
-        
-        NetworkManager.shared.fetchImage(url: imgUrl) { imageData in
-            self.mainImage.image = UIImage(data: imageData)
+        NetworkManager.shared.fetchImage(url: imgUrl ?? "") { result in
+            switch result {
+            case .success(let imageData):
+                self.mainImage.image = UIImage(data: imageData)
+            case .failure(let error):
+                self.mainImage.image = UIImage(named: "no_photo3")
+                print(error)
+            }
+            
+            self.activityIndicator.stopAnimating()
         }
     }
     
@@ -83,7 +93,7 @@ extension DetailController: UITableViewDelegate, UITableViewDataSource {
         } else {
             if indexPath.section == 0 {
                 switch indexPath.row {
-                case 0: cell.title.text = "Air date - \(episode?.air_date ?? "Unknown")"
+                case 0: cell.title.text = "Air date - \(episode?.airDate ?? "Unknown")"
                 case 1: cell.title.text = "Director - \(episode?.director ?? "Unknown")"
                 default: cell.title.text = "Writer - \(episode?.writer ?? "Unknown")"
                 }

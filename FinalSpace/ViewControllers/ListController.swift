@@ -9,68 +9,54 @@ import UIKit
 
 class ListController: UICollectionViewController {
     
-    var data: String!
+    var data: DataType!
     
-    private var characters = [Character]()
+    private var values = [Any]()
     private var character: Character!
-    private var episodes = [Episode]()
     private var episode: Episode!
+    
+    private var activityIndicator = UIActivityIndicatorView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        activityIndicator = GlobalMethods.shared.addActivityIndicator(in: self.view)
     }
     
-    func updateCharacters() {
-        NetworkManager.shared.fetchCharacters(by: "character") { characters in
-            self.characters = characters
-            self.collectionView.reloadData()
+    func updateData(by: DataType) {
+        NetworkManager.shared.fetchData(by: by) { result in
+            switch result {
+            case .success(let data):
+                self.values = data
+                self.activityIndicator.stopAnimating()
+                self.collectionView.reloadData()
+            case .failure(let error): print(error)
+            }
         }
     }
-    
-    func updateEpisodes() {
-        NetworkManager.shared.fetchEpisodes(by: "episode") { episodes in
-            self.episodes = episodes
-            self.collectionView.reloadData()
-        }
-    }
-    
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let detailController = segue.destination as! DetailController
-        if data == "Character" {
+        if data == .character {
             detailController.character = character
         } else {
             detailController.episode = episode
         }
     }
 
-    
-
 }
 
 extension ListController {
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if data == "Character" {
-            return characters.count
-        } else {
-            return episodes.count
-        }
+        values.count
         
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! CollectionCell
         
-        if data == "Character" {
-            let character = characters[indexPath.row]
-            cell.setupCharacters(character)
-        } else {
-            let episode = episodes[indexPath.row]
-            cell.setupEpisodes(episode)
-        }
-        
-        
+        let value = values[indexPath.row]
+        cell.setupCell(value)
         
         cell.configureImage(hight: (UIScreen.main.bounds.width / 2 - 10) / 1.75)
         cell.configureBackgroundView()
@@ -79,11 +65,10 @@ extension ListController {
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        objext = results[indexPath.row]
-        if data == "Character" {
-            character = characters[indexPath.row]
+        if data == .character {
+            character = values[indexPath.row] as? Character
         } else {
-            episode = episodes[indexPath.row]
+            episode = values[indexPath.row] as? Episode
         }
         performSegue(withIdentifier: "goToDetail", sender: nil)
     }

@@ -13,25 +13,13 @@ class TableCell: UITableViewCell {
     
     func setupCharacters(_ url: String){
         
-        DispatchQueue.global().async {
-            guard let url = URL(string: url) else { return }
-            URLSession.shared.dataTask(with: url) { data, _, error in
-                guard let data = data else {
-                    print(error?.localizedDescription ?? "No description")
-                    return
-                }
-                do {
-                    
-                    let character = try JSONDecoder().decode(Character.self, from: data)
-                    DispatchQueue.main.async {
-                        self.title.text = character.name
-                    }
-                    
-                } catch let error {
-                    print(error.localizedDescription)
-                }
-                
-            }.resume()
+        NetworkManager.shared.fetchCharacters(url: url) { result in
+            switch result {
+            case .success(let character):
+                self.title.text = character.name
+            case .failure(let error):
+                print(error)
+            }
         }
     }
 

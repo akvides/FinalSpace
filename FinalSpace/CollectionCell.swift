@@ -14,20 +14,36 @@ class CollectionCell: UICollectionViewCell {
     @IBOutlet weak var collectionCellView: UIView!
     @IBOutlet weak var collectionCellLabel: UILabel!
     
-    func setupCharacters(_ values: Character) {
-        collectionCellLabel.text = values.name
+    func setupCell(_ value: Any) {
+        var name: String?
+        var imageUrl: String?
         
-        NetworkManager.shared.fetchImage(url: values.img_url ?? "") { imageData in
-            self.collectionCellImage.image = UIImage(data: imageData)
+        if let character = value as? Character {
+            name = character.name
+            imageUrl = character.imageUrl
+        } else if let episode = value as? Episode {
+            name = episode.name
+            imageUrl = episode.imageUrl
         }
-    }
-    
-    func setupEpisodes(_ values: Episode) {
-        collectionCellLabel.text = values.name
         
-        NetworkManager.shared.fetchImage(url: values.img_url ?? "") { imageData in
-            self.collectionCellImage.image = UIImage(data: imageData)
+        let activityIndicator = GlobalMethods.shared.addActivityIndicator(in: self.contentView)
+        activityIndicator.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
+        
+        collectionCellLabel.text = name
+        
+        NetworkManager.shared.fetchImage(url: imageUrl ?? "") { result in
+            switch result {
+                
+            case .success(let imageData):
+                self.collectionCellImage.image = UIImage(data: imageData)
+            case .failure(let error):
+                print(error.localizedDescription)
+                self.collectionCellImage.image = UIImage(named: "no_photo3")
+            }
+            
+            activityIndicator.stopAnimating()
         }
+        
     }
     
     func configureImage(hight: CGFloat) {

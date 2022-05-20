@@ -9,28 +9,21 @@ import UIKit
 
 class StartController: UIViewController {
     
-    private var data: String!
+    private var data: DataType!
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let listController = segue.destination as! ListController
-        if data == "Character" {
-            listController.updateCharacters()
-        } else {
-            listController.updateEpisodes()
-        }
+        listController.updateData(by: data)
         listController.data = data
-        
     }
     
-    
-    
     @IBAction func viewListOfCharacters() {
-        data = "Character"
+        data = .character
         performSegue(withIdentifier: "goToList", sender: nil)
     }
     
     @IBAction func viewListOfEpisodes() {
-        data = "Episode"
+        data = .episode
         performSegue(withIdentifier: "goToList", sender: nil)
     }
     
